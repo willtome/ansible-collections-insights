@@ -1,0 +1,5 @@
+---
+plugin: redhat.insights.insights
+hostname_selection: 
+  - ansible_host
+  - none

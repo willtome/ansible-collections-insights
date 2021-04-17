@@ -57,6 +57,11 @@ DOCUMENTATION = '''
         required: False
         type: list
         default: []
+      hostname_selection:
+        description: Insights field name to select inventory_hostname
+        required: False
+        type: list
+        default: ['ansible_host','fqdn','display_name','none']
 '''
 
 EXAMPLES = '''
@@ -180,6 +185,7 @@ class InventoryModule(BaseInventoryPlugin, Constructable):
         get_tags = self.get_option('get_tags')
         filter_tags = self.get_option('filter_tags')
         registered_with = self.get_option('registered_with')
+        hostname_selection = self.get_option('hostname_selection')
         systems_by_id = {}
         system_tags = {}
         results = []
@@ -232,8 +238,9 @@ class InventoryModule(BaseInventoryPlugin, Constructable):
             systems_by_id[host['id']] = host_name
             for item in host.keys():
                 self.inventory.set_variable(host_name, vars_prefix + item, host[item])
-                if item == 'fqdn':
-                    self.inventory.set_variable(host_name, 'ansible_host', host[item])
+                for field in hostname_selection:
+                  if field != 'none' and item == field and host[item] != None:
+                      self.inventory.set_variable(host_name, 'ansible_host', host[item])
 
             if get_patches:
                 if host_name in patching.keys():
